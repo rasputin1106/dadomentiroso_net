@@ -84,8 +84,8 @@ public class Client extends JFrame implements Runnable{
 					
 					Socket cli=new Socket("127.0.0.1", 9091 ); //ip y puerto que se utiliza
 					
-					DataOutputStream flujo = new DataOutputStream(cli.getOutputStream()); //salida del socket cliente
-					flujo.writeUTF("Conectar"); // envio el string 
+					DataOutputStream flujoSalida = new DataOutputStream(cli.getOutputStream()); //salida del socket cliente
+					flujoSalida.writeUTF("Conectar"); // envio el string 
 					
 
 						//aca creamos un socket como si fuera servidor 
@@ -93,9 +93,9 @@ public class Client extends JFrame implements Runnable{
 						ServerSocket serv= new ServerSocket(9092);
 						Socket cliRecibo;
 						cliRecibo=serv.accept();
-						DataInputStream flujo2 = new DataInputStream(cliRecibo.getInputStream());
+						DataInputStream flujoEntrada = new DataInputStream(cliRecibo.getInputStream());
 						//leo lo que me diga el server y dependiendo de eso me conecto o no 
-						if(flujo2.readUTF().toString().equals("CONECTESE")) {
+						if(flujoEntrada.readUTF().toString().equals("CONECTESE")) {
 							System.out.println("me conecte");
 							registro = 1;
 							//mensajes de juego 
@@ -111,7 +111,8 @@ public class Client extends JFrame implements Runnable{
 							while(true) {
 								cliRecibo=serv.accept();
 								System.out.println("Esperando Mensaje");
-								String msg = flujo2.readUTF();
+								DataInputStream flujoEntrada2 = new DataInputStream(cliRecibo.getInputStream());
+								String msg = flujoEntrada2.readUTF();
 								System.out.println("mensaje : "+msg);
 								
 								if(msg.equals("tu turno")) { //haga una suposicion pues es el primero
@@ -125,7 +126,8 @@ public class Client extends JFrame implements Runnable{
 										//escribo en la tabla de mensajes
 										areaDeMensajes.append("mi suposicion : "+dadoT+","+numDT );
 										//mando al servidor
-										flujo.writeUTF(dadoT.toString()+","+numDT.toString());										
+										DataOutputStream flujoSalida2 = new DataOutputStream(cli.getOutputStream()); //salida del socket cliente
+										flujoSalida2.writeUTF(dadoT.toString()+","+numDT.toString());										
 									}
 									
 										
@@ -144,7 +146,7 @@ public class Client extends JFrame implements Runnable{
 								
 							}
 							
-						}else if(flujo2.readUTF().toString().equals("NOCONECTESE")){
+						}else if(flujoEntrada.readUTF().toString().equals("NOCONECTESE")){
 							System.out.println("No me conecte");
 							cliRecibo.close();
 							serv.close();
