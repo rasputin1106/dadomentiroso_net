@@ -1,0 +1,118 @@
+package distribuidos;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import com.sun.org.apache.xalan.internal.xsltc.dom.AbsoluteIterator;
+
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.AbstractAction;
+import java.awt.event.ActionEvent;
+import javax.swing.Action;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.awt.event.ActionListener;;
+
+public class Client extends JFrame implements Runnable{
+
+	private JPanel contentPane;
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Client frame = new Client();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Client() {
+		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		
+		getContentPane().setLayout(null);
+		contentPane.setLayout(null);
+		
+		JButton btnNewButton = new JButton("CONECTARSE");
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					Socket cli=new Socket("192.168.0.4", 9091 ); //ip y puerto que se utiliza
+					
+					DataOutputStream flujo = new DataOutputStream(cli.getOutputStream()); //salida del socket cliente
+					flujo.writeUTF("Conectar"); // envio el string 
+					
+
+						//aca creamos un socket como si fuera servidor 
+						//para escuchar lo que me diga el server
+						ServerSocket serv= new ServerSocket(9092);
+						Socket cliRecibo;
+						cliRecibo=serv.accept();
+						DataInputStream flujo2 = new DataInputStream(cliRecibo.getInputStream());
+						//leo lo que me diga el server y dependiendo de eso me conecto o no 
+						if(flujo2.readUTF().toString().equals("CONECTESE")) {
+							System.out.println("me conecte");
+							
+							
+						}else if(flujo2.readUTF().toString().equals("NOCONECTESE")){
+							System.out.println("No me conecte");
+							
+						}else {
+							System.out.println("No ES EL MENSAJE ");
+							cliRecibo.close();
+						}
+					//cierro el cliente de escritura
+					System.out.println("voy a cerrar todo ");
+					cliRecibo.close();
+					cli.close();	
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			}
+		});
+		btnNewButton.setBounds(22, 11, 143, 31);
+		contentPane.add(btnNewButton);
+		setSize(400, 400);
+		setVisible(true);
+	}
+
+	private class SwingAction extends AbstractAction {
+		public SwingAction() {
+			putValue(NAME, "SwingAction");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+		}
+	}
+
+	public void run() { //esto se ejecuta en un segundo plano
+		// TODO Auto-generated method stub
+		
+	}
+}
